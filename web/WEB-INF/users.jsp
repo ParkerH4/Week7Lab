@@ -72,7 +72,7 @@
 
 
                     <form method="POST" action="users">
-                        <input type="hidden" name="email_d" value="${user.email}">
+                        <input type="hidden" name="deleteEmail" value="${user.email}">
                         <td><input type="submit" value="Delete">
                             <input type="hidden" name="action" value="delete"></td>
                     </form>
