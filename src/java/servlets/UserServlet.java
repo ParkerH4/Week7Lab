@@ -10,7 +10,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import models.User;
+import services.UserService;
 
 /**
  *
@@ -22,11 +24,11 @@ public class UserServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        UserDB userDB = new UserDB();
+        ArrayList<User> users = new ArrayList<>();
         try {
-            UserDB userDB = new UserDB();
-            ArrayList<User> users = new ArrayList<>();
-
-            if (users != null) {
+            if (users == null) {
+            } else {
                 users = null;
             }
             users = userDB.getAll();
@@ -44,6 +46,7 @@ public class UserServlet extends HttpServlet {
 
         String action = request.getParameter("action");
         UserDB userDB = new UserDB();
+        UserService us = new UserService();
 
         switch (action) {
             case "add":
@@ -53,19 +56,19 @@ public class UserServlet extends HttpServlet {
                 String password = request.getParameter("addPass");
                 int role = Integer.parseInt(request.getParameter("addRole"));
 
-                User user = new User(email, firstname, lastname, password, role);
                 try {
-                    userDB.insert(user);
+                    us.insert(email, firstname, lastname, password, role);
                 } catch (Exception ex) {
                     Logger.getLogger(UserServlet.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 break;
+
             case "edit":
-                String editedEmail = request.getParameter("editEmail");
-                String editedFirst = request.getParameter("editFirst");
-                String editedLast = request.getParameter("editLast");
-                String editedPass = request.getParameter("editPass");
-                String editedRole = request.getParameter("editRole");
+                String editedEmail = request.getParameter("newEmail");
+                String editedFirst = request.getParameter("newFirst");
+                String editedLast = request.getParameter("newLast");
+                String editedPass = request.getParameter("newPass");
+                String editedRole = request.getParameter("newRole");
 
                 request.setAttribute("editEmail", editedEmail);
                 request.setAttribute("editFirst", editedFirst);
@@ -73,29 +76,34 @@ public class UserServlet extends HttpServlet {
                 request.setAttribute("editPass", editedPass);
                 request.setAttribute("editRole", editedRole);
                 break;
-            case "delete":
-                User deletedUser = null;
-                String deletedEmail = request.getParameter("deleteEmail");
-                try {
-                    deletedUser = userDB.get(deletedEmail);
-                    userDB.delete(deletedUser);
-                } catch (Exception ex) {
-                    Logger.getLogger(UserServlet.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                break;
-            case "save":
-                String savedEmail = request.getParameter("editEmail");
-                String savedFirst = request.getParameter("editFirst");
-                String savedLast = request.getParameter("editLast");
-                String savedPass = request.getParameter("editPass");
-                int savedRole = Integer.parseInt(request.getParameter("editRole"));
 
-                User user1 = new User(savedEmail, savedFirst, savedLast, savedPass, savedRole);
-                try {
-                    userDB.update(user1);
-                } catch (Exception ex) {
-                    Logger.getLogger(UserServlet.class.getName()).log(Level.SEVERE, null, ex);
+            case "delete":
+                String deletedEmail = request.getParameter("deleteEmail");
+                 {
+                    try {
+                        us.delete(deletedEmail);
+                    } catch (Exception ex) {
+                        Logger.getLogger(UserServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
+
+                break;
+
+            case "update":
+                String updatedEmail = request.getParameter("editEmail");
+                String updatedFirst = request.getParameter("editFirst");
+                String updatedLast = request.getParameter("editLast");
+                String updatedPass = request.getParameter("editPass");
+                int updatedRole = Integer.parseInt(request.getParameter("editRole"));
+
+                 {
+                    try {
+                        us.update(updatedEmail, updatedFirst, updatedLast, updatedPass, updatedRole);
+                    } catch (Exception ex) {
+                        Logger.getLogger(UserServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
                 break;
 
             case "cancel":
@@ -106,5 +114,13 @@ public class UserServlet extends HttpServlet {
                 request.setAttribute("editRole", "");
                 break;
         }
+        ArrayList<User> users;
+        try {
+            users = userDB.getAll();
+            request.setAttribute("users", users);
+        } catch (Exception ex) {
+            Logger.getLogger(UserServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        getServletContext().getRequestDispatcher("/WEB-INF/users.jsp").forward(request, response);
     }
 }

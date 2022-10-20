@@ -92,31 +92,34 @@ public class UserDB {
             cp.freeConnection(con);
         }
     }
-  public void update(User user) throws Exception {
+
+    public void update(User user) throws Exception {
         ConnectionPool cp = ConnectionPool.getInstance();
         Connection con = cp.getConnection();
         PreparedStatement ps = null;
-        String sql = "UPDATE note SET email=?,first_name=?, last_name = ?, password = ?, role = ? WHERE email=?";
-        
+        String sql = "UPDATE user SET email=?, first_name=?, last_name=?, password=?, role=? WHERE email=?";
+
         try {
-           ps = con.prepareStatement(sql);
+            ps = con.prepareStatement(sql);
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getFirstName());
             ps.setString(3, user.getLastName());
             ps.setString(4, user.getPassword());
             ps.setInt(5, user.getRole());
+            ps.setString(6, user.getEmail());
             ps.executeUpdate();
         } finally {
             DBUtil.closePreparedStatement(ps);
             cp.freeConnection(con);
         }
     }
+
     public void delete(User user) throws Exception {
         ConnectionPool cp = ConnectionPool.getInstance();
         Connection con = cp.getConnection();
         PreparedStatement ps = null;
         String sql = "DELETE FROM user WHERE email=?";
-        
+
         try {
             ps = con.prepareStatement(sql);
             ps.setString(1, user.getEmail());
@@ -128,5 +131,3 @@ public class UserDB {
     }
 
 }
-
-
